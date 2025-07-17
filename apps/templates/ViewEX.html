@@ -522,46 +522,14 @@
                 totalTime: 175,
                 totalWorkouts: 6,
                 expectedCalories: 420,
-                workouts: [
-                    {
-                        title: '임시 운동1',
-                        startTime: '07:00',
-                        duration: '15분'
-                    }
-                ]
+                workouts: []
             },
             tuesday: {
                 dayName: '화요일',
                 totalTime: 120,
                 totalWorkouts: 4,
                 expectedCalories: 350,
-                workouts: [
-                    {
-                        title: '임시 운동1',
-                        startTime: '07:30',
-                        duration: '35분'
-                    },
-                    {
-                        title: '임시 운동2',
-                        startTime: '12:30',
-                        duration: '30분'
-                    },
-                    {
-                        title: '임시 운동3',
-                        startTime: '17:00',
-                        duration: '25분'
-                    },
-                    {
-                        title: '임시 운동4',
-                        startTime: '21:00',
-                        duration: '15분'
-                    },
-                    {
-                        title: '임시 운동5',
-                        startTime: '21:00',
-                        duration: '15분'
-                    }
-                ]
+                workouts: []
             },
             wednesday: {
                 dayName: '수요일',
@@ -575,13 +543,7 @@
                 totalTime: 140,
                 totalWorkouts: 5,
                 expectedCalories: 380,
-                workouts: [
-                    {
-                        title: '임시 운동1',
-                        startTime: '07:00',
-                        duration: '40분'
-                    }
-                ]
+                workouts: []
             },
             friday: {
                 dayName: '금요일',
@@ -595,18 +557,7 @@
                 totalTime: 110,
                 totalWorkouts: 4,
                 expectedCalories: 320,
-                workouts: [
-                    {
-                        title: '임시 운동1',
-                        startTime: '09:00',
-                        duration: '30분'
-                    },
-                    {
-                        title: '임시 운동2',
-                        startTime: '11:00',
-                        duration: '25분'
-                    }
-                ]
+                workouts: []
             },
             sunday: {
                 dayName: '일요일',
@@ -620,8 +571,7 @@
         // 전역 변수
         let currentWeekDates = [];
         let timelineData = [];
-        let currentDay = getCurrentDayKey(); // 오늘 요일로 초기화
-
+        let currentDay = getCurrentDayKey();
         // 초기화
         document.addEventListener('DOMContentLoaded', function () {
             initializeWeekData();
