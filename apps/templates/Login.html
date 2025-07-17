@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈트레이닝 웹 - 로그인</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://jiy1234.s3.ap-northeast-2.amazonaws.com/Health_light.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: #466F81;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .grid-title {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .button-group {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 30px;
+        }
+
+        .login-btn,
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #466F81;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn:hover,
+        .signup-btn:hover {
+            background-color: #d8c8ff;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form class="grid-wrapper" method="POST" action="/login">
+            <div class="grid-title">AI 홈트레이너<br>로그인</div>
+
+            <div class="form-group">
+                <label for="id">아이디</label>
+                <input type="text" id="id" name="id" placeholder="아이디를 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+
+            <div class="button-group">
+                <button class="login-btn" type="submit">로그인</button>
+                <button class="signup-btn" type="button" onclick="location.href='/signup'">회원가입</button>
+            </div>
+
+            <div class="error-message" id="error">아이디 또는 비밀번호를 확인하세요.</div>
+        </form>
+    </div>
+
+    <script>
+        window.onload = function () {
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            alert("{{ messages[0] }}");
+            document.getElementById("id").value = "";
+            document.getElementById("password").value = "";
+            {% endif %}
+            {% endwith %}
+        }
+    </script>
+</body>
+
+</html>

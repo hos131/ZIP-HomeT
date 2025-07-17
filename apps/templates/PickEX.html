@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>홈트레이닝 웹</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #466F81;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 1200px;
+      max-width: 90vw;
+      height: 90vh;
+      background-color: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-title {
+      font-size: 40px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    .record-button {
+      width: 120px;
+      height: 50px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      background-color: white;
+      cursor: pointer;
+      transition: 0.2s ease;
+      border: 2px solid #888;
+    }
+
+    .record-button:hover {
+      background-color: #d8c8ff;
+    }
+
+    .content-wrapper {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+      height: 100%;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 200px);
+      grid-template-rows: repeat(3, 90px);
+      gap: 80px 50px;
+      padding-left: 50px;
+    }
+
+    .button-grid button {
+      width: 200px;
+      height: 90px;
+      font-size: 22px;
+      border: none;
+      border-radius: 12px;
+      background-color: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: 0.2s ease;
+      border: 2px solid #888;
+    }
+
+    .button-grid button:hover {
+      background-color: #d8c8ff;
+    }
+
+    .left_panel,
+    .right_panel {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .right_panel img {
+      height: 650px;
+      width: 500px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="grid-title">운동 선택</div>
+      <button class="record-button" onclick="viewRecords()">기록 보기</button>
+    </div>
+    <div class="content-wrapper">
+      <div class="left_panel">
+        <div class="button-grid">
+          <button onmouseenter="changeImage('burpee')" onmouseleave="resetImage()" onclick="selectExercise('burpee')">버피
+            테스트</button>
+          <button onmouseenter="changeImage('cross_lunge')" onmouseleave="resetImage()"
+            onclick="selectExercise('cross_lunge')">크로스 런지</button>
+          <button onmouseenter="changeImage('knee_pushup')" onmouseleave="resetImage()"
+            onclick="selectExercise('knee_pushup')">니 푸시업</button>
+          <button onmouseenter="changeImage('pushup')" onmouseleave="resetImage()"
+            onclick="selectExercise('pushup')">푸시업</button>
+          <button onmouseenter="changeImage('plank')" onmouseleave="resetImage()"
+            onclick="selectExercise('plank')">플랭크</button>
+          <button onmouseenter="changeImage('side_lunge')" onmouseleave="resetImage()"
+            onclick="selectExercise('side_lunge')">사이드 런지</button>
+        </div>
+      </div>
+      <div class="right_panel">
+        <img id="exerciseImage" src="https://jiy1234.s3.ap-northeast-2.amazonaws.com/운동부위없음.png" alt="인체 이미지" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectExercise(exercise) {
+      // 서버로 선택된 운동 전송
+      fetch('http://localhost:5001/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exercise: exercise })
+      }).then(res => {
+        if (res.ok) {
+          // 운동 설정 성공 후 다음 페이지로 이동
+          window.location.href = `/playex?exercise=${exercise}`;
+        } else {
+          alert("운동 설정 실패");
+        }
+      });
+    }
+
+    function viewRecords() {
+      // 기록 보기 페이지로 이동
+      window.location.href = '/records';
+    }
+
+    const hoverImages = {
+      burpee: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/버피부위.png",
+      cross_lunge: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/크로스런지부위.png",
+      knee_pushup: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/니푸시업부위.png",
+      pushup: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/푸시업부위.png",
+      plank: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/플랭크부위.png",
+      side_lunge: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/사이즈런지부위.png",
+      default: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/운동부위없음.png"
+    };
+
+    // 버튼 hover 시 이미지 변경
+    function changeImage(exercise) {
+      const img = document.getElementById("exerciseImage");
+      img.src = hoverImages[exercise] || hoverImages.default;
+    }
+
+    // hover 해제 시 원래 이미지로 복구
+    function resetImage() {
+      const img = document.getElementById("exerciseImage");
+      img.src = hoverImages.default;
+    }
+  </script>
+</body>
+
+</html>

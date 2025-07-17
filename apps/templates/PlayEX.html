@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>홈트레이닝 웹</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #466F81;
+        }
+
+        .container {
+            width: 90%;
+            height: 90vh;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .webcam {
+            grid-column: 1;
+            grid-row: 1 / 4;
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .webcam-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 20px;
+            font-size: 20px;
+            border-radius: 10px;
+            text-align: left;
+            min-height: 120px;
+            width: 80%;
+            overflow-y: visible;
+        }
+
+        #feedbackList {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        #feedbackList li {
+            padding: 4px 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 18px;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .pose-video {
+            grid-column: 2;
+            grid-row: 1;
+            background-color: gray;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            border-radius: 10px;
+            max-width: 1920px;
+            aspect-ratio: 16 / 9;
+        }
+
+        .exercise-info {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: white;
+            border: 1px solid black;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+
+        .info-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .navigation {
+            grid-column: 2;
+            grid-row: 3;
+            background-color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        #btn-stop {
+            width: 100%;
+            height: 100%;
+            font-size: 24px;
+            padding: 20px;
+            border: none;
+            background-color: #df1b01;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .circle-timer-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 250px;
+            margin: auto;
+        }
+
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+        }
+
+        .background-ring {
+            fill: none;
+            stroke: #ddd;
+        }
+
+        .foreground-ring {
+            fill: none;
+            stroke: #4caf50;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+        }
+
+        .timer-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .countdown-text {
+            font-size: 70px;
+            font-weight: bold;
+            text-align: center;
+            animation: countdown-blink 1s ease-in-out;
+        }
+
+        .waiting-text {
+            font-size: 50px;
+            color: #ffffff;
+            font-style: italic;
+            text-align: center;
+        }
+
+        #feedbackList li.countdown-text {
+            font-size: 70px !important;
+            border-bottom: none;
+            color: yellow;
+            text-align: center;
+        }
+
+        #feedbackList.noborder li {
+            border-bottom: none;
+        }
+
+        .popup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            padding: 40px;
+            border: none;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            min-width: 400px;
+            animation: popupSlideIn 0.3s ease-out;
+        }
+
+        @keyframes popupSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .popup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(248, 249, 250, 0.8));
+            border-radius: 20px;
+            z-index: -1;
+        }
+
+        .popup h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .popup button {
+            margin: 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup button:first-of-type {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .popup button:first-of-type:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .popup button:last-of-type {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .popup button:last-of-type:hover {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="webcam">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <div class="webcam-caption" id="webcamCaption">
+                <ul id="feedbackList">
+                    <li id="waitingMessage" class="waiting-text"
+                        style="text-align: center; border-bottom: none; width: 100%;">동작 분석 중...
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="pose-video">
+            <video id="poseVideo" autoplay muted loop playsinline controls
+                style="width: 100%; height: 100%; border-radius: 10px;">
+                <source src="" type="video/mp4" />
+                사용자의 브라우저는 video 태그를 지원하지 않습니다.
+            </video>
+        </div>
+
+        <div class="exercise-info">
+            <div class="info-box" id="ex-type">운동 종류</div>
+            <div class="circle-timer-container">
+                <svg class="progress-ring" viewBox="0 0 160 160">
+                    <circle class="background-ring" cx="80" cy="80" r="65" stroke-width="8" />
+                    <circle class="foreground-ring" cx="80" cy="80" r="65" stroke-width="8" />
+                </svg>
+                <div class="timer-label" id="timer-label">01:30</div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button id="btn-stop" onclick="location.href='/pickex'">운동 그만두기</button>
+        </div>
+
+        <div id="timer-end-popup" class="popup">
+            <h2>⏰ 운동이 끝났습니다!</h2>
+            <p id="final-time">운동 시간: 01:30</p>
+            <button onclick="restartTimer()">다시 하기</button>
+            <button onclick="location.href='/pickex'">운동 선택</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io("http://localhost:5001");
+
+        // 운동 관련 상수
+        const EXERCISE_CONFIG = {
+            burpee: { name: "버피 테스트", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/burpeetest.mp4" },
+            cross_lunge: { name: "크로스 런지", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/crosslunge.mp4" },
+            knee_pushup: { name: "니 푸시업", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/kneepushup.mp4" },
+            pushup: { name: "푸시업", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/pushup.mp4" },
+            plank: { name: "플랭크", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/plank.mp4" },
+            side_lunge: { name: "사이드 런지", video: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/sidelunge.mp4" }
+        };
+
+        // 타이머 관련 변수
+        let timerInterval = null;
+        const totalSeconds = 90;
+        let currentSeconds = totalSeconds;
+        let startTime = null;
+
+        // DOM 요소들
+        const timerLabel = document.getElementById("timer-label");
+        const foregroundRing = document.querySelector(".foreground-ring");
+        const feedbackList = document.getElementById("feedbackList");
+
+        // WebRTC 관련 변수 추가
+        let peerConnection = null;
+        let localStream = null;
+
+        // 소켓 연결
+        socket.on("connect", () => {
+            console.log("✅ WebSocket 연결됨");
+        });
+
+        socket.on("disconnect", () => {
+            console.log("❌ WebSocket 연결 끊어짐");
+        });
+
+        socket.on("feedback", (data) => {
+            try {
+                const message = data.message;
+                const waitingMsg = document.getElementById("waitingMessage");
+
+                if (waitingMsg) {
+                    waitingMsg.remove();
+                }
+
+                if (message.startsWith("📌")) {
+                    feedbackList.innerHTML = "";
+                    return;
+                }
+
+                const li = document.createElement("li");
+                li.textContent = message;
+                feedbackList.appendChild(li);
+            } catch (error) {
+                console.error("피드백 처리 중 오류:", error);
+            }
+        });
+
+        // 유틸리티 함수들
+        function getExerciseFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("exercise");
+        }
+
+        function formatTime(seconds) {
+            const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const sec = String(seconds % 60).padStart(2, '0');
+            return `${min}:${sec}`;
+        }
+
+        function getElapsedTime() {
+            if (!startTime) return 0;
+            return Math.floor((Date.now() - startTime) / 1000);
+        }
+
+        // 운동 설정 함수들
+        function initializeExercise() {
+            const exercise = getExerciseFromURL();
+            const config = EXERCISE_CONFIG[exercise] || EXERCISE_CONFIG.burpee;
+
+            // 운동 이름 설정
+            document.getElementById("ex-type").innerText = config.name;
+
+            // 비디오 설정
+            const videoTag = document.getElementById("poseVideo");
+            const sourceTag = videoTag.querySelector("source");
+            sourceTag.src = config.video;
+            videoTag.load();
+            videoTag.play().catch(error => {
+                console.error("비디오 재생 오류:", error);
+            });
+        }
+
+        // 타이머 관련 함수들
+        function initializeTimer() {
+            const radius = 65; // 85에서 65로 변경
+            const circumference = 2 * Math.PI * radius;
+            foregroundRing.style.strokeDasharray = circumference;
+            foregroundRing.style.strokeDashoffset = 0;
+        }
+
+        function updateRingProgress() {
+            const radius = 65; // 85에서 65로 변경
+            const circumference = 2 * Math.PI * radius;
+            const percent = currentSeconds / totalSeconds;
+            const offset = circumference * (1 - percent);
+            foregroundRing.style.strokeDashoffset = offset;
+
+            // 색상 변경
+            if (percent <= 0.11) {
+                foregroundRing.style.stroke = "#f44336"; // 빨강
+            } else if (percent <= 0.33) {
+                foregroundRing.style.stroke = "#ff9800"; // 주황
+            } else {
+                foregroundRing.style.stroke = "#4caf50"; // 초록
+            }
+        }
+
+        function startCountdownAndTimer() {
+            let count = 5;
+            feedbackList.classList.add("noborder");
+            feedbackList.innerHTML = "";
+
+            const countdownInterval = setInterval(() => {
+                const countdownLi = document.createElement("li");
+                countdownLi.className = "countdown-text";
+                countdownLi.textContent = count;
+
+                feedbackList.innerHTML = "";
+                feedbackList.appendChild(countdownLi);
+
+                count--;
+
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    feedbackList.innerHTML = "";
+                    feedbackList.classList.remove("noborder");
+                    startCircularTimer();
+                }
+            }, 1000);
+        }
+
+        function startCircularTimer() {
+            // 시작 시간 기록
+            startTime = Date.now();
+
+            // 피드백 영역 초기화 및 대기 메시지 표시
+            feedbackList.innerHTML = '<li id="waitingMessage">동작 분석 중...</li>';
+
+            currentSeconds = totalSeconds;
+            clearInterval(timerInterval);
+            updateRingProgress();
+
+            timerInterval = setInterval(() => {
+                timerLabel.textContent = formatTime(currentSeconds);
+                updateRingProgress();
+
+                if (currentSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    stopAllActivities(); // 모든 동작 중지
+                    const elapsedTime = getElapsedTime();
+                    document.getElementById("final-time").innerText = `운동 시간: ${formatTime(elapsedTime)}`;
+                    document.getElementById("timer-end-popup").style.display = "block";
+                }
+
+                currentSeconds--;
+            }, 1000);
+        }
+
+        // 모든 동작 중지 함수
+        function stopAllActivities() {
+            console.log("🛑 모든 동작을 중지합니다...");
+
+            // 1. 카메라 스트림 중지
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log("📹 카메라 스트림 중지됨");
+                });
+            }
+
+            // 2. WebRTC 연결 종료
+            if (peerConnection) {
+                peerConnection.close();
+                console.log("🔗 WebRTC 연결 종료됨");
+            }
+
+            // 3. 가이드 비디오 일시 정지
+            const poseVideo = document.getElementById("poseVideo");
+            if (poseVideo) {
+                poseVideo.pause();
+                console.log("⏸️ 가이드 비디오 일시 정지됨");
+            }
+
+            // 4. 소켓 피드백 수신 중지 (소켓은 유지하되 피드백만 무시)
+            socket.off("feedback");
+            console.log("📡 피드백 수신 중지됨");
+
+            // 5. 웹캠 비디오 일시 정지
+            const localVideo = document.getElementById("localVideo");
+            if (localVideo && localVideo.srcObject) {
+                localVideo.pause();
+                console.log("📷 웹캠 비디오 일시 정지됨");
+            }
+        }
+
+        function restartTimer() {
+            document.getElementById("timer-end-popup").style.display = "none";
+
+            // 모든 동작 다시 시작
+            console.log("🔄 운동을 다시 시작합니다...");
+
+            // 가이드 비디오 재생
+            const poseVideo = document.getElementById("poseVideo");
+            if (poseVideo) {
+                poseVideo.play();
+            }
+
+            // 소켓 피드백 다시 연결
+            socket.on("feedback", (data) => {
+                try {
+                    const message = data.message;
+                    const waitingMsg = document.getElementById("waitingMessage");
+
+                    if (waitingMsg) {
+                        waitingMsg.remove();
+                    }
+
+                    if (message.startsWith("📌")) {
+                        feedbackList.innerHTML = "";
+                        return;
+                    }
+
+                    const li = document.createElement("li");
+                    li.textContent = message;
+                    feedbackList.appendChild(li);
+                } catch (error) {
+                    console.error("피드백 처리 중 오류:", error);
+                }
+            });
+
+            // WebRTC 다시 연결
+            startWebRTC();
+
+            // 타이머 다시 시작
+            startCircularTimer();
+        }
+
+        // WebRTC 관련 함수
+        async function startWebRTC() {
+            try {
+                peerConnection = new RTCPeerConnection(); // 전역 변수에 할당
+                localStream = await navigator.mediaDevices.getUserMedia({ // 전역 변수에 할당
+                    video: true,
+                    audio: false
+                });
+
+                document.getElementById("localVideo").srcObject = localStream;
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                const exercise = getExerciseFromURL();
+
+                const res = await fetch("http://localhost:8080/offer", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sdp: peerConnection.localDescription.sdp,
+                        type: peerConnection.localDescription.type,
+                        exercise: exercise
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const answer = await res.json();
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+
+                console.log("✅ WebRTC 연결 성공");
+            } catch (error) {
+                console.error("WebRTC 연결 오류:", error);
+                alert("카메라 연결에 실패했습니다. 페이지를 새로고침해주세요.");
+            }
+        }
+
+        // 초기화
+        window.onload = () => {
+            try {
+                initializeExercise();
+                initializeTimer();
+                startWebRTC();
+                startCountdownAndTimer();
+            } catch (error) {
+                console.error("초기화 오류:", error);
+            }
+        };
+
+        // 페이지 언로드 시 정리
+        window.onbeforeunload = () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        };
+    </script>
+</body>
+
+</html>

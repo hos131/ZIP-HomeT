@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈트레이닝 일기장</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #466F81;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .container {
+            width: 90%;
+            height: 90vh;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 10px 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            background: #466F81;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background-color: #d8c8ff;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #466F81;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #466F81;
+            flex-shrink: 0;
+        }
+
+        .timeline-header {
+            margin-bottom: 15px;
+        }
+
+        .timeline-header h2 {
+            color: #466F81;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .timeline-date {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #466F81 #f0f0f0;
+        }
+
+        .timeline::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .timeline::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .timeline::-webkit-scrollbar-thumb {
+            background: #466F81;
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            min-width: 80px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+        }
+
+        .timeline-item:hover {
+            background: rgba(70, 111, 129, 0.1);
+            border-color: rgba(70, 111, 129, 0.3);
+        }
+
+        .timeline-item.active {
+            background: rgba(70, 111, 129, 0.2);
+            border-color: #466F81;
+        }
+
+        .timeline-day {
+            background: #466F81;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+        }
+
+        .timeline-item.active .timeline-day {
+            background: #2c5f75;
+        }
+
+        .timeline-date-num {
+            font-size: 0.7rem;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .timeline-workouts {
+            font-size: 0.65rem;
+            color: #666;
+        }
+
+        /* Cards Section */
+        .cards-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section-title {
+            color: #466F81;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 5px;
+            flex: 1;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cards-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb {
+            background: #466F81;
+            border-radius: 3px;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background: #2c5f75;
+        }
+
+        .workout-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .card-content {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        .card-time-badge {
+            background: #466F81;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .card-main-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card-duration {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card-actions {
+            padding: 0 20px 20px 20px;
+        }
+
+        .stats-btn {
+            background: #f8f9fa;
+            color: #466F81;
+            border: 1px solid #466F81;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .stats-btn:hover {
+            background: #466F81;
+            color: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-column: 2;
+            grid-row: 2;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #466F81;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #466F81;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .stats-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #466F81;
+        }
+
+        /* No workouts message */
+        .no-workouts {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .no-workouts-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                height: 95vh;
+            }
+
+            .sidebar {
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-item {
+                min-width: 70px;
+            }
+
+            .card-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .card-main-info {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .card-time-badge {
+                align-self: flex-start;
+            }
+
+            .back-btn {
+                position: static;
+                margin-bottom: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">뒤로</button>
+            <div class="header-content">
+                <h1>운동 일기장</h1>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Timeline Section -->
+            <div class="timeline-section">
+                <div class="timeline-header">
+                    <h2>주간 일정</h2>
+                    <div class="timeline-date" id="week-range">날짜 로딩 중...</div>
+                </div>
+
+                <div class="timeline" id="timeline">
+                    <!-- Timeline items will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Cards Section -->
+            <div class="cards-section">
+                <h2 class="section-title" id="selected-day-title">운동 상세 정보</h2>
+
+                <div class="cards-container" id="cards-container">
+                    <!-- Cards will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3 id="sidebar-title">통계</h3>
+            <div class="stats-item">
+                <span class="stats-label">총 운동 시간</span>
+                <span class="stats-value" id="total-time">0분</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">완료한 운동</span>
+                <span class="stats-value" id="completed-workouts">0개</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">예상 칼로리</span>
+                <span class="stats-value" id="expected-calories">0kcal</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 뒤로 가기 함수
+        function goBack() {
+            // 브라우저 히스토리가 있으면 뒤로 가기
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // 히스토리가 없으면 메인 페이지로 이동 (예시)
+                alert('이전 페이지가 없습니다.');
+                // window.location.href = '/main'; // 실제 메인 페이지 URL로 변경
+            }
+        }
+
+        // 날짜 관련 함수들
+        function getCurrentWeekDates() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // 월요일까지의 오프셋
+
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset);
+
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                dates.push(date);
+            }
+
+            return dates;
+        }
+
+        function formatDate(date) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${month}/${day}`;
+        }
+
+        function formatFullDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}년 ${month}월 ${day}일`;
+        }
+
+        function getDayName(dayIndex) {
+            const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+            return days[dayIndex];
+        }
+
+        function getCurrentDayKey() {
+            const today = new Date();
+            const dayIndex = today.getDay();
+            const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            return dayKeys[dayIndex];
+        }
+
+        // 요일별 운동 데이터
+        const weeklyWorkouts = {
+            monday: {
+                dayName: '월요일',
+                totalTime: 175,
+                totalWorkouts: 6,
+                expectedCalories: 420,
+                workouts: [
+                    {
+                        title: '임시 운동1',
+                        startTime: '07:00',
+                        duration: '15분'
+                    }
+                ]
+            },
+            tuesday: {
+                dayName: '화요일',
+                totalTime: 120,
+                totalWorkouts: 4,
+                expectedCalories: 350,
+                workouts: [
+                    {
+                        title: '임시 운동1',
+                        startTime: '07:30',
+                        duration: '35분'
+                    },
+                    {
+                        title: '임시 운동2',
+                        startTime: '12:30',
+                        duration: '30분'
+                    },
+                    {
+                        title: '임시 운동3',
+                        startTime: '17:00',
+                        duration: '25분'
+                    },
+                    {
+                        title: '임시 운동4',
+                        startTime: '21:00',
+                        duration: '15분'
+                    },
+                    {
+                        title: '임시 운동5',
+                        startTime: '21:00',
+                        duration: '15분'
+                    }
+                ]
+            },
+            wednesday: {
+                dayName: '수요일',
+                totalTime: 0,
+                totalWorkouts: 0,
+                expectedCalories: 0,
+                workouts: []
+            },
+            thursday: {
+                dayName: '목요일',
+                totalTime: 140,
+                totalWorkouts: 5,
+                expectedCalories: 380,
+                workouts: [
+                    {
+                        title: '임시 운동1',
+                        startTime: '07:00',
+                        duration: '40분'
+                    }
+                ]
+            },
+            friday: {
+                dayName: '금요일',
+                totalTime: 90,
+                totalWorkouts: 3,
+                expectedCalories: 280,
+                workouts: []
+            },
+            saturday: {
+                dayName: '토요일',
+                totalTime: 110,
+                totalWorkouts: 4,
+                expectedCalories: 320,
+                workouts: [
+                    {
+                        title: '임시 운동1',
+                        startTime: '09:00',
+                        duration: '30분'
+                    },
+                    {
+                        title: '임시 운동2',
+                        startTime: '11:00',
+                        duration: '25분'
+                    }
+                ]
+            },
+            sunday: {
+                dayName: '일요일',
+                totalTime: 60,
+                totalWorkouts: 2,
+                expectedCalories: 150,
+                workouts: []
+            }
+        };
+
+        // 전역 변수
+        let currentWeekDates = [];
+        let timelineData = [];
+        let currentDay = getCurrentDayKey(); // 오늘 요일로 초기화
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeWeekData();
+            generateTimeline();
+            loadWorkouts(currentDay);
+        });
+
+        // 주간 데이터 초기화
+        function initializeWeekData() {
+            currentWeekDates = getCurrentWeekDates();
+
+            // 주간 범위 표시 업데이트
+            const weekRangeElement = document.getElementById('week-range');
+            const startDate = formatFullDate(currentWeekDates[0]);
+            const endDate = formatFullDate(currentWeekDates[6]);
+            weekRangeElement.textContent = `${startDate} - ${endDate}`;
+
+            // 타임라인 데이터 생성
+            const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayKorean = ['월', '화', '수', '목', '금', '토', '일'];
+
+            timelineData = dayKeys.map((dayKey, index) => ({
+                day: dayKey,
+                dayKor: dayKorean[index],
+                date: formatDate(currentWeekDates[index])
+            }));
+        }
+
+        // 타임라인 동적 생성
+        function generateTimeline() {
+            const timelineContainer = document.getElementById('timeline');
+
+            timelineContainer.innerHTML = timelineData.map((item, index) => {
+                const dayData = weeklyWorkouts[item.day];
+                const workoutCount = dayData.workouts.length;
+                const workoutText = workoutCount === 0 ? '기록 없음' : `${workoutCount}개 운동`;
+                const isActive = item.day === currentDay ? 'active' : '';
+
+                return `
+                    <div class="timeline-item ${isActive}" data-day="${item.day}">
+                        <div class="timeline-day">${item.dayKor}</div>
+                        <div class="timeline-date-num">${item.date}</div>
+                        <div class="timeline-workouts">${workoutText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // 타임라인 아이템 클릭 이벤트 재연결
+            attachTimelineEventListeners();
+        }
+
+        // 타임라인 이벤트 리스너 연결
+        function attachTimelineEventListeners() {
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    // 모든 타임라인 아이템에서 active 클래스 제거
+                    document.querySelectorAll('.timeline-item').forEach(i => i.classList.remove('active'));
+
+                    // 클릭된 아이템에 active 클래스 추가
+                    this.classList.add('active');
+
+                    // 선택된 요일 업데이트
+                    currentDay = this.dataset.day;
+                    loadWorkouts(currentDay);
+                });
+            });
+        }
+
+        // 요일별 운동 로드 함수
+        function loadWorkouts(day) {
+            const dayData = weeklyWorkouts[day];
+            const container = document.getElementById('cards-container');
+            const title = document.getElementById('selected-day-title');
+
+            title.textContent = `${dayData.dayName} 운동 상세 정보`;
+
+            if (dayData.workouts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-workouts">
+                        <div class="no-workouts-icon">😴</div>
+                        <p><strong>오늘 수행된 운동이 없습니다.</strong></p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = dayData.workouts.map((workout, index) => `
+                    <div class="workout-card" data-workout-index="${index}">
+                        <div class="card-content">
+                            <div class="card-time-badge">${workout.startTime}</div>
+                            <div class="card-main-info">
+                                <h3 class="card-title">${workout.title}</h3>
+                                <div class="card-duration">${workout.duration}</div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="stats-btn">통계 보기</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateSidebar(day);
+            attachCardEventListeners();
+        }
+
+        // 사이드바 업데이트
+        function updateSidebar(day) {
+            const dayData = weeklyWorkouts[day];
+
+            document.getElementById('sidebar-title').textContent = `${dayData.dayName} 통계`;
+            document.getElementById('total-time').textContent = `${dayData.totalTime}분`;
+            document.getElementById('completed-workouts').textContent = `0개`;
+            document.getElementById('expected-calories').textContent = `${dayData.expectedCalories}kcal`;
+        }
+
+        // 카드 이벤트 리스너 연결
+        function attachCardEventListeners() {
+            // 통계 보기 버튼
+            document.querySelectorAll('.stats-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const card = this.closest('.workout-card');
+                    const workoutTitle = card.querySelector('.card-title').textContent;
+
+                    alert(`피드백 리스트 및 횟수 출력.`);
+                    // 피드백 불러오기
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
