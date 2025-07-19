@@ -159,7 +159,7 @@
 
     function viewRecords() {
       // 기록 보기 페이지로 이동
-      window.location.href = '/records';
+      window.location.href = '/viewex';
     }
 
     const hoverImages = {
@@ -184,6 +184,19 @@
       img.src = hoverImages.default;
     }
   </script>
+
+  <script>
+    window.onload = function () {
+      const userId = "{{ session.get('user_id') }}";
+      if (userId) {
+        sessionStorage.setItem("user_id", userId);
+        console.log("✅ PickEX에서 user_id 저장:", userId);
+      } else {
+        console.warn("❌ PickEX에서 user_id 없음");
+      }
+    }
+  </script>
+
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, session
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
@@ -35,7 +35,7 @@ def login_post():
     user = cur.fetchone()
 
     if user:
-        flash("로그인 성공")
+        session['user_id'] = user_id
         return redirect(url_for('pickex'))  
     else:
         flash("아이디 또는 비밀번호가 틀렸습니다.")
@@ -49,6 +49,10 @@ def pickex():
 @app.route("/playex")
 def playex():
     return render_template("PlayEX.html")
+
+@app.route("/viewex")
+def viewex():
+    return render_template("ViewEX.html")
 
 
 # 회원가입 화면

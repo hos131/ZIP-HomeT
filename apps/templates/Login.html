@@ -134,6 +134,11 @@
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             alert("{{ messages[0] }}");
+
+            {% if "로그인 성공" in messages[0] %}
+            sessionStorage.setItem("user_id", "{{ session['user_id'] }}");
+            {% endif %}
+
             document.getElementById("id").value = "";
             document.getElementById("password").value = "";
             {% endif %}

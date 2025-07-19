@@ -40,9 +40,7 @@ data_map = {
 }
 
 # ✅ MongoDB 연결
-mongo = MongoClient("mongodb://localhost:27017/")
-db = mongo["skeleton_db"]
-collection = db["skeleton_data"]
+client = MongoClient("mongodb+srv://data1234:Atlas1234@cluster0.rkveizh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 # ✅ SocketIO 연결
 sio = socketio.Client()
@@ -122,7 +120,7 @@ def process_pose(frame, count):
         if "Right Wrist" in pose_dict:
             pose_dict["Right Palm"] = pose_dict["Right Wrist"]
 
-        collection.insert_one({"frame": count, "landmarks": pose_dict})
+        globals()["db"]["skeleton_data"].insert_one({"frame": count, "landmarks": pose_dict})
 
         if count % capture_interval == 0:
             threading.Thread(target=predict_in_background, args=(pose_dict,)).start()
@@ -180,9 +178,15 @@ class VideoTrack(VideoStreamTrack):
 relay = MediaRelay()
 pcs = set()
 
-# ✅ 수정된 offer 함수
+# ✅ offer 함수
 async def offer(request):
-    params = await request.json()
+    params = await request.json() 
+    user_id = params.get("user_id")  
+    globals()["db"] = client[f"userdb_{user_id}"]
+
+    print("🧪 전달받은 JSON:", params)
+    print("🧪 전달받은 user_id:", user_id)
+
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
     exercise = params.get("exercise")
     model_path = model_map.get(exercise)

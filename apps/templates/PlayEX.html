@@ -604,6 +604,8 @@
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
                 const exercise = getExerciseFromURL();
+                const userId = sessionStorage.getItem("user_id");
+                console.log("📌 전달할 user_id:", userId);  // 디버깅용 출력
 
                 const res = await fetch("http://localhost:8080/offer", {
                     method: "POST",
@@ -611,7 +613,8 @@
                     body: JSON.stringify({
                         sdp: peerConnection.localDescription.sdp,
                         type: peerConnection.localDescription.type,
-                        exercise: exercise
+                        exercise: exercise,
+                        user_id: userId
                     })
                 });
 
