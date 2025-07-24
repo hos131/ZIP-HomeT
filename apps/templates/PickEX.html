@@ -108,6 +108,89 @@
       width: 500px;
       object-fit: contain;
     }
+
+    /* 팝업 스타일 */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background-color: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 500px;
+      max-width: 90vw;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    /* 운동 이름 - 가장 큰 폰트 */
+    .popup-exercise-name {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    /* 운동 자극 부위 - 빨간색 */
+    .popup-target-muscles {
+      font-size: 18px;
+      color: #e74c3c;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    /* 간단한 설명 - 일반 색상 */
+    .popup-description {
+      font-size: 18px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .popup-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      min-width: 120px;
+    }
+
+    .start-button {
+      background-color: #466F81;
+      color: white;
+    }
+
+    .start-button:hover {
+      background-color: #3a5a6a;
+    }
+
+    .cancel-button {
+      background-color: #f0f0f0;
+      color: #333;
+      border: 2px solid #888;
+    }
+
+    .cancel-button:hover {
+      background-color: #d8c8ff;
+    }
   </style>
 </head>
 
@@ -120,18 +203,19 @@
     <div class="content-wrapper">
       <div class="left_panel">
         <div class="button-grid">
-          <button onmouseenter="changeImage('burpee')" onmouseleave="resetImage()" onclick="selectExercise('burpee')">버피
+          <button onmouseenter="changeImage('burpee')" onmouseleave="resetImage()"
+            onclick="showExercisePopup('burpee')">버피
             테스트</button>
           <button onmouseenter="changeImage('cross_lunge')" onmouseleave="resetImage()"
-            onclick="selectExercise('cross_lunge')">크로스 런지</button>
+            onclick="showExercisePopup('cross_lunge')">크로스 런지</button>
           <button onmouseenter="changeImage('knee_pushup')" onmouseleave="resetImage()"
-            onclick="selectExercise('knee_pushup')">니 푸시업</button>
+            onclick="showExercisePopup('knee_pushup')">니 푸시업</button>
           <button onmouseenter="changeImage('pushup')" onmouseleave="resetImage()"
-            onclick="selectExercise('pushup')">푸시업</button>
+            onclick="showExercisePopup('pushup')">푸시업</button>
           <button onmouseenter="changeImage('plank')" onmouseleave="resetImage()"
-            onclick="selectExercise('plank')">플랭크</button>
+            onclick="showExercisePopup('plank')">플랭크</button>
           <button onmouseenter="changeImage('side_lunge')" onmouseleave="resetImage()"
-            onclick="selectExercise('side_lunge')">사이드 런지</button>
+            onclick="showExercisePopup('side_lunge')">사이드 런지</button>
         </div>
       </div>
       <div class="right_panel">
@@ -140,28 +224,145 @@
     </div>
   </div>
 
+  <!-- 팝업 HTML -->
+  <div id="exercisePopup" class="popup-overlay">
+    <div class="popup-content">
+      <h1 id="popupExerciseName" class="popup-exercise-name"></h1>
+      <p id="popupTargetMuscles" class="popup-target-muscles"></p>
+      <p id="popupDescription" class="popup-description"></p>
+      <div class="popup-buttons">
+        <button id="startExerciseBtn" class="popup-button start-button">운동 시작하기</button>
+        <button onclick="hideExercisePopup()" class="popup-button cancel-button">다른 운동하기</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // 운동 설명 데이터 (구조화)
+    const exerciseDescriptions = {
+      burpee: {
+        name: "버피 테스트",
+        targetMuscles: "전신 (가슴, 어깨, 코어, 하체)",
+        description: "전신 근력과 심폐지구력을 동시에 기를 수 있는 고강도 운동입니다. 여러 동작을 연속으로 수행하여 짧은 시간에 높은 칼로리를 소모할 수 있습니다."
+      },
+      cross_lunge: {
+        name: "크로스 런지",
+        targetMuscles: "하체 (둔근, 대퇴사두근, 햄스트링)",
+        description: "다리를 교차하여 런지 동작을 수행하는 운동으로, 하체 근력과 균형감각을 향상시킵니다. 둔근, 대퇴근, 햄스트링을 효과적으로 단련할 수 있습니다."
+      },
+      knee_pushup: {
+        name: "니 푸시업",
+        targetMuscles: "상체 (가슴, 어깨, 삼두근)",
+        description: "무릎을 바닥에 대고 수행하는 푸시업으로, 일반 푸시업보다 난이도가 낮아 초보자에게 적합합니다. 가슴, 어깨, 삼두근을 단련할 수 있습니다."
+      },
+      pushup: {
+        name: "푸시업",
+        targetMuscles: "상체 (가슴, 어깨, 삼두근, 코어)",
+        description: "상체 근력 운동의 기본으로, 가슴, 어깨, 삼두근, 코어 근육을 동시에 단련할 수 있습니다. 올바른 자세로 수행하면 전신 근력 향상에 도움이 됩니다."
+      },
+      plank: {
+        name: "플랭크",
+        targetMuscles: "코어 (복근, 등 근육, 어깨)",
+        description: "코어 근육을 강화하는 대표적인 정적 운동입니다. 복근, 등 근육, 어깨 근육을 동시에 단련하여 전체적인 몸의 안정성을 향상시킵니다."
+      },
+      side_lunge: {
+        name: "사이드 런지",
+        targetMuscles: "하체 (내전근, 둔근, 대퇴사두근)",
+        description: "옆으로 다리를 벌려 런지 동작을 수행하는 운동으로, 내전근과 둔근을 집중적으로 단련합니다. 하체의 측면 근력과 유연성을 향상시킵니다."
+      }
+    };
+
+    let selectedExercise = null;
+
+    // 팝업 표시 함수
+    function showExercisePopup(exercise) {
+      selectedExercise = exercise;
+      const popup = document.getElementById('exercisePopup');
+      const exerciseName = document.getElementById('popupExerciseName');
+      const targetMuscles = document.getElementById('popupTargetMuscles');
+      const description = document.getElementById('popupDescription');
+      const startBtn = document.getElementById('startExerciseBtn');
+
+      // 팝업 내용 설정
+      const exerciseInfo = exerciseDescriptions[exercise];
+      exerciseName.textContent = exerciseInfo.name;
+      targetMuscles.textContent = `자극 부위: ${exerciseInfo.targetMuscles}`;
+      description.textContent = exerciseInfo.description;
+
+      // 시작 버튼 이벤트 설정 (핵심 수정 부분)
+      startBtn.onclick = function () {
+        // 운동 정보를 지역 변수에 저장 (selectedExercise가 null이 되기 전에)
+        const exerciseToStart = selectedExercise;
+        console.log("🎯 선택된 운동:", exerciseToStart); // 디버깅용
+
+        hideExercisePopup();
+
+        // 저장된 운동 정보로 페이지 이동
+        requestAnimationFrame(() => {
+          selectExercise(exerciseToStart);
+        });
+      };
+
+      // 팝업 표시
+      popup.style.display = 'flex';
+    }
+
+    // 팝업 숨김 함수
+    function hideExercisePopup() {
+      const popup = document.getElementById('exercisePopup');
+      popup.style.display = 'none';
+      selectedExercise = null; // 이제 안전하게 null로 설정 가능
+
+      // DOM 업데이트가 완료되도록 강제 리플로우
+      popup.offsetHeight;
+    }
+
+    // 팝업 외부 클릭 시 닫기
+    document.getElementById('exercisePopup').addEventListener('click', function (e) {
+      if (e.target === this) {
+        hideExercisePopup();
+      }
+    });
+
+    // 기존 selectExercise 함수 (에러 처리 강화)
     function selectExercise(exercise) {
+      console.log("🚀 운동 선택 함수 호출:", exercise);
+
+      // null 체크 추가
+      if (!exercise) {
+        console.error("❌ 운동이 선택되지 않았습니다:", exercise);
+        alert("운동 선택에 오류가 발생했습니다. 다시 시도해주세요.");
+        return;
+      }
+
       // 서버로 선택된 운동 전송
       fetch('http://localhost:5001/select', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ exercise: exercise })
       }).then(res => {
+        console.log("📡 서버 응답 상태:", res.status);
         if (res.ok) {
+          console.log("✅ 서버 요청 성공, 페이지 이동 중...");
           // 운동 설정 성공 후 다음 페이지로 이동
           window.location.href = `/playex?exercise=${exercise}`;
         } else {
+          console.error("❌ 서버 요청 실패:", res.status);
           alert("운동 설정 실패");
         }
+      }).catch(error => {
+        console.error("❌ 네트워크 오류:", error);
+        alert("네트워크 오류가 발생했습니다.");
       });
     }
 
+    // 기존 viewRecords 함수 (변경 없음)
     function viewRecords() {
       // 기록 보기 페이지로 이동
       window.location.href = '/viewex';
     }
 
+    // 기존 이미지 관련 코드 (변경 없음)
     const hoverImages = {
       burpee: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/버피부위.png",
       cross_lunge: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/크로스런지부위.png",
@@ -172,13 +373,13 @@
       default: "https://jiy1234.s3.ap-northeast-2.amazonaws.com/운동부위없음.png"
     };
 
-    // 버튼 hover 시 이미지 변경
+    // 버튼 hover 시 이미지 변경 (변경 없음)
     function changeImage(exercise) {
       const img = document.getElementById("exerciseImage");
       img.src = hoverImages[exercise] || hoverImages.default;
     }
 
-    // hover 해제 시 원래 이미지로 복구
+    // hover 해제 시 원래 이미지로 복구 (변경 없음)
     function resetImage() {
       const img = document.getElementById("exerciseImage");
       img.src = hoverImages.default;
@@ -186,6 +387,7 @@
   </script>
 
   <script>
+    // 기존 세션 관리 코드 (변경 없음)
     window.onload = function () {
       const userId = "{{ session.get('user_id') }}";
       if (userId) {
